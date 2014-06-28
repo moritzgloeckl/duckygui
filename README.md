@@ -1,4 +1,6 @@
-duckygui
+The Ducky Encoder GUI
 ========
 
-A GUI for the Ducky Encoder
+A GUI for the Ducky Encoder!
+
+
