@@ -12,7 +12,6 @@ import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.BadLocationException;
@@ -20,6 +19,10 @@ import javax.swing.text.StyledDocument;
 
 public class EditorPanel extends JPanel {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private JTextPane textArea = new JTextPane();
 	private JScrollPane scrollPane = new JScrollPane(textArea);
 	private File f;

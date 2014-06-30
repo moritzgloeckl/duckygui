@@ -17,9 +17,10 @@ import javax.swing.text.rtf.RTFEditorKit;
 
 public class Encoder {
 
+	//Encoder-Version 2.6.3
+
 	private static Properties keyboardProps = new Properties();
 	private static Properties layoutProps = new Properties();
-	private static String version = "2.6.3";
 	private String inputFile;
 	private String outputFile;
 	private String layoutFile;
@@ -108,7 +109,6 @@ public class Encoder {
 	}
 
 	private static void loadProperties(String lang) {
-		System.out.println("LALA: " + lang);
 		InputStream in;
 		ClassLoader loader = ClassLoader.getSystemClassLoader();
 		try {

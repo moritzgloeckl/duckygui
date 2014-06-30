@@ -13,7 +13,11 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
  
 public class CodeDocument extends DefaultStyledDocument {
-    private String word = "";
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private String word = "";
     private SimpleAttributeSet bold = new SimpleAttributeSet();
     private SimpleAttributeSet string = new SimpleAttributeSet();
     private SimpleAttributeSet normal = new SimpleAttributeSet();
