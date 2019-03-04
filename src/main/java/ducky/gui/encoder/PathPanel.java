@@ -1,6 +1,7 @@
 package ducky.gui.encoder;
 
 import ducky.gui.GUIFrame;
+import ducky.gui.Settings;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -8,53 +9,52 @@ import javax.swing.filechooser.FileFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class PathPanel extends JPanel implements ActionListener {
 
 	/**
-	 * 
+     *
 	 */
 	private static final long serialVersionUID = 1L;
 	/**
-	 * 
+     *
 	 */
 	private JTextField inputField;
 	private JTextField outputField;
 	private JFileChooser fileChooser = new JFileChooser();
 	private JButton inputBrowse = new JButton("Browse");
 	private JButton outputBrowse = new JButton("Browse");
-	private JButton layoutBrowse = new JButton("Browse");
-	private File[] files = new File[3];
 	private GUIFrame frame;
 	private String[] languages = {"be", "ca", "ch", "de", "dk", "es", "fr", "gb", "it", "no", "pt", "ru", "se", "sv", "uk", "us"};
 	private JComboBox<String> comboBox = new JComboBox<String>(languages);
+    private Settings settings;
 
 	/**
 	 * Create the panel.
 	 */
-	public PathPanel(GUIFrame frame) {
+    public PathPanel(GUIFrame frame, Settings settings) {
 		setBorder(new TitledBorder(null, "Paths", TitledBorder.LEFT,
 				TitledBorder.TOP, null, null));
 		setLayout(null);
 
+        this.settings = settings;
 		this.frame = frame;
 		JLabel label = new JLabel("Input file:");
 		label.setBounds(10, 25, 72, 14);
 		add(label);
 
-		inputField = new JTextField();
+        inputField = getTextField(22);
 		inputField.setToolTipText("Enter path of the input file");
-		inputField.setColumns(10);
-		inputField.setBounds(76, 22, 220, 20);
 		add(inputField);
 
 		JLabel label_1 = new JLabel("Output file:");
 		label_1.setBounds(10, 81, 72, 14);
 		add(label_1);
 
-		outputField = new JTextField();
-		outputField.setColumns(10);
-		outputField.setBounds(76, 78, 220, 20);
+        outputField = getTextField(78);
 		add(outputField);
 
 		JLabel label_2 = new JLabel("Layout file:");
@@ -65,85 +65,94 @@ public class PathPanel extends JPanel implements ActionListener {
 		inputBrowse.addActionListener(this);
 		add(inputBrowse);
 
-		layoutBrowse.setBounds(323, 49, 72, 23);
-		layoutBrowse.addActionListener(this);
-		add(layoutBrowse);
-
 		outputBrowse.setBounds(323, 77, 72, 23);
 		outputBrowse.addActionListener(this);
 		add(outputBrowse);
 
 		comboBox.setBounds(76, 50, 220, 20);
-		comboBox.setEditable(true);
 		comboBox.addActionListener(this);
-
 		add(comboBox);
 	}
 
-	public String[] getPaths() {
-		String[] paths = new String[3];
-		paths[0] = inputField.getText();
-		paths[1] = (String) comboBox.getSelectedItem();
-		paths[2] = outputField.getText();
+    /**
+     * get paths from user settings
+     */
+    public void syncSettings() {
+        String inputFilePath = settings.getInputFilePath();
+        inputField.setText(inputFilePath);
+        Path path = Paths.get(inputFilePath);
+        if (Files.exists(path)) {
+            frame.openInEditor(path.toFile());
+        }
 
-		return paths;
-	}
+        outputField.setText(settings.getOutputFilePath());
+        comboBox.setSelectedItem(settings.getLayout());
+    }
 
-	private File openFileChooser(final String ext) {
-		fileChooser = new JFileChooser();
-		fileChooser.setDialogTitle("Choose a file");
-		fileChooser.setFileFilter(new FileFilter() {
-			@Override
-			public boolean accept(File f) {
-				return f.isDirectory()
-						|| f.getName().toLowerCase().endsWith(ext);
-			}
+    private JTextField getTextField(int y) {
+        JTextField textField = new JTextField();
+        textField.setEditable(false);
+        textField.setColumns(10);
+        textField.setBounds(76, y, 220, 20);
+        return textField;
+    }
 
-			@Override
-			public String getDescription() {
-				if (ext.equals(".txt")) {
-					return "Text Documents (*.txt)";
-				} else if (ext.equals(".properties")) {
-					return "Properties (*.properties)";
-				} else if (ext.equals(".bin")) {
-					return ("Binary Files (*.bin)");
-				} else {
-					return "All Files (*.*)";
-				}
-			}
-		});
-		int state = fileChooser.showOpenDialog(null);
-		if (state == JFileChooser.APPROVE_OPTION) {
-			File file = fileChooser.getSelectedFile();
-			return file;
-		} else {
-			System.out.println("Cancel");
-			return null;
-		}
-	}
+    private File openFileChooser(String ext, String defaultPath) {
+        fileChooser = new JFileChooser(defaultPath);
+        fileChooser.setDialogTitle("Choose a file");
+        fileChooser.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                return f.isDirectory()
+                        || f.getName().toLowerCase().endsWith(ext);
+            }
+
+            @Override
+            public String getDescription() {
+                if (ext.equals(".txt")) {
+                    return "Text Documents (*.txt)";
+                } else if (ext.equals(".properties")) {
+                    return "Properties (*.properties)";
+                } else if (ext.equals(".bin")) {
+                    return ("Binary Files (*.bin)");
+                } else {
+                    return "All Files (*.*)";
+                }
+            }
+        });
+        int state = fileChooser.showOpenDialog(null);
+        if (state == JFileChooser.APPROVE_OPTION) {
+            return fileChooser.getSelectedFile();
+        }
+        return null;
+    }
+
+    private void setInputField(String path) {
+        inputField.setText(path);
+        settings.setInputFilePath(path);
+    }
+
+    private void setOutputField(String path) {
+        outputField.setText(path);
+        settings.setOutputFilePath(path);
+    }
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		if (e.getSource() == inputBrowse) {
-			File f = openFileChooser(".txt");
+            File f = openFileChooser(".txt", settings.getInputFilePath());
 			if (f != null) {
-				files[0] = f;
-				inputField.setText(f.getAbsolutePath());
+                setInputField(f.getAbsolutePath());
 				frame.openInEditor(f);
 			}
-		} else if (e.getSource() == layoutBrowse) {
-			File f = openFileChooser(".properties");
-			if (f != null) {
-				files[1] = f;
-				comboBox.setSelectedItem(f.getAbsolutePath());
-			}
 		} else if (e.getSource() == outputBrowse) {
-			File f = openFileChooser(".bin");
+            File f = openFileChooser(".bin", settings.getOutputFilePath());
 			if (f != null) {
-				files[2] = f;
-				outputField.setText(f.getAbsolutePath());
-			}
-		} 
+                setOutputField(f.getAbsolutePath());
+            }
+        } else if (e.getSource() == comboBox) {
+            settings.setLayout((String) comboBox.getSelectedItem());
+		}
 	}
 }
