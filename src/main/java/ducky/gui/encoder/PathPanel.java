@@ -81,7 +81,9 @@ public class PathPanel extends JPanel implements ActionListener {
         String inputFilePath = settings.getInputFilePath();
         inputField.setText(inputFilePath);
         Path path = Paths.get(inputFilePath);
-        if (Files.exists(path)) {
+        if (Files.exists(path) &&
+                !Files.isDirectory(path) &&
+                Files.isReadable(path)) {
             frame.openInEditor(path.toFile());
         }
 
