@@ -20,9 +20,10 @@ public class GUIFrame extends JFrame implements ActionListener {
 	private JPanel contentPane;
 	private Encoder encoder = new Encoder();
 	private PathPanel pathPanel;
-	private EditorPanel editorPanel = new EditorPanel();
+    private EditorPanel editorPanel;
 	private JButton btnSaveFile;
 	private JButton export = new JButton("Export bin");
+    private Settings settings;
 
 	public static void main(String[] args) {
 		try {
@@ -55,7 +56,9 @@ public class GUIFrame extends JFrame implements ActionListener {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 
-		pathPanel = new PathPanel(this);
+        settings = new Settings();
+        pathPanel = new PathPanel(this, settings);
+        editorPanel = new EditorPanel();
 
 		pathPanel.setBounds(10, 11, 406, 108);
 		contentPane.add(pathPanel);
@@ -71,6 +74,8 @@ public class GUIFrame extends JFrame implements ActionListener {
 		btnSaveFile.addActionListener(this);
 		btnSaveFile.setBounds(216, 347, 200, 23);
 		contentPane.add(btnSaveFile);
+
+        pathPanel.syncSettings(); // put here to not get Nullpointer - because will call openInEditor() callback
 	}
 
 	public void openInEditor(File f) {
@@ -88,9 +93,9 @@ public class GUIFrame extends JFrame implements ActionListener {
 	}
 
 	private void encode() {
-		String[] paths = pathPanel.getPaths();
+        String inputPath = settings.getInputFilePath();
 		boolean error = false;
-		if (paths[0].equals("")) {
+        if (inputPath.equals("")) {
 			if (getContent().length() != 0) {
 				encoder.setInputText(getContent());
 			} else {
@@ -99,17 +104,18 @@ public class GUIFrame extends JFrame implements ActionListener {
 						JOptionPane.ERROR_MESSAGE);
 			}
 		} else {
-			encoder.setInput(paths[0]);
-		}
-		
-		if (paths[2].equals("")) {
+            encoder.setInput(inputPath);
+        }
+
+        String outputPath = settings.getOutputFilePath();
+        if (outputPath.equals("")) {
 			error = true;
 			JOptionPane.showMessageDialog(this, "Please specify an output path.", "Error",
 					JOptionPane.ERROR_MESSAGE);
 		} else {
-			encoder.setOutput(paths[2]);
-		}
-		encoder.setLayout(paths[1]);
+            encoder.setOutput(outputPath);
+        }
+        encoder.setLayout(settings.getLayout());
 		if (!error) {
 			encoder.encode();
 		}
@@ -120,7 +126,7 @@ public class GUIFrame extends JFrame implements ActionListener {
 	}
 
 	private void saveFile() {
-		JFileChooser fileChooser = new JFileChooser();
+        JFileChooser fileChooser = new JFileChooser(settings.getInputFilePath());
 		fileChooser.setDialogTitle("Specify a file to save");
 
 		int userSelection = fileChooser.showSaveDialog(this);
@@ -148,5 +154,4 @@ public class GUIFrame extends JFrame implements ActionListener {
 			}
 		}
 	}
-
 }
